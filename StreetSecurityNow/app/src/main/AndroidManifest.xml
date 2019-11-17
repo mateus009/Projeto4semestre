@@ -22,8 +22,16 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".ui.login.LoginActivity"
+<<<<<<< HEAD
             android:label="@string/title_activity_login"
             android:exported="true">s></activity>
+=======
+            android:label="@string/title_activity_login"></activity>
+        <activity
+            android:name=".Cadastro"
+            android:label="@string/title_activity_login"></activity>
+
+>>>>>>> 311c937123564673bf40b6a1ccd38b1fe1e15859
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
