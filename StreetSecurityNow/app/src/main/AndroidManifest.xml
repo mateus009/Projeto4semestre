@@ -34,7 +34,14 @@
         <activity
             android:name=".Cadastro"
             android:label="@string/cadastro">
+<<<<<<< HEAD
 
+=======
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+>>>>>>> 6a2437efe3ccaff2cfbe7fbc7071d9020d24960b
 
         </activity>
 
