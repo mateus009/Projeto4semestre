@@ -189,11 +189,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
 
     }
 
+    private fun fPlaceMarkerOnMap(location: LatLng) {
+
+        val markerOptions = MarkerOptions().position(location)
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(
+            BitmapFactory.decodeResource(resources, R.mipmap.ic_femaleuser_location)))
+        mMap.addMarker(markerOptions)
+
+    }
+
     fun fetchJson(lat:Double, lng: Double, lcation:String ){
         val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$lat,$lng&radius=15000&type=$lcation&key=AIzaSyA-e-43mD-6MdO21GkJN0WTHGig1J6dMuM"
 
         val request = Request.Builder().url(url).build()
-        val client = OkHttpClient();
+        val client = OkHttpClient()
         client.newCall(request).enqueue(object: Callback{
             override fun onResponse(call: Call, response: Response) {
                 val body = response.body?.string()
@@ -241,7 +250,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
                     val currentLatLng = LatLng(places.geometry.location.lat,places.geometry.location.lng )
                     println(places)
                     handler.post(Runnable {
-                        placeMarkerOnMap(currentLatLng)
+                        fPlaceMarkerOnMap(currentLatLng)
+
                     })
                 }
             }
