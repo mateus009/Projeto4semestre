@@ -22,4 +22,26 @@
             android:onClick="PlacesHospital"
             android:src="@android:drawable/ic_menu_search" />
 
+    <Button
+        android:id="@+id/plc"
+        android:layout_gravity="bottom|end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+
+        android:layout_marginBottom="170dp"
+        android:onClick="PlacesPolice"
+        android:src="@android:drawable/ic_menu_search" />
+
+    <Button
+        android:id="@+id/delegMul"
+        android:layout_gravity="bottom|end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+
+        android:layout_marginBottom="228dp"
+        android:onClick="PlacesDelegMulher"
+        android:src="@android:drawable/ic_menu_search" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
