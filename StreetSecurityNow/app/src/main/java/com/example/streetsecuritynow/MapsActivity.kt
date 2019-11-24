@@ -117,18 +117,69 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
 
         mMap.isMyLocationEnabled = true
 
-
+        mMap.clear()
         fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
             // Got last known location. In some rare situations this can be null.
 
-            if (location != null) {
-                lastLocation = location
+        lastLocation = location
 
-                fetchJson(location.latitude, location.longitude)
+        fetchJson(location.latitude, location.longitude, "hospital")
 
-            }
+
         }
     }
+
+    fun PlacesDelegMulher(View:View) {
+
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            return
+        }
+
+        mMap.isMyLocationEnabled = true
+
+        mMap.clear()
+        fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
+            // Got last known location. In some rare situations this can be null.
+
+
+            lastLocation = location
+
+            fetchJson()
+
+
+        }
+    }
+
+    fun PlacesPolice(View:View) {
+
+
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            return
+        }
+
+        mMap.isMyLocationEnabled = true
+
+        mMap.clear()
+        fusedLocationClient.lastLocation.addOnSuccessListener(this) { location ->
+            // Got last known location. In some rare situations this can be null.
+
+
+        lastLocation = location
+
+        fetchJson(location.latitude, location.longitude, "police")
+
+
+        }
+    }
+
     private fun placeMarkerOnMap(location: LatLng) {
 
         val markerOptions = MarkerOptions().position(location)
@@ -138,11 +189,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
 
     }
 
-    fun fetchJson(lat:Double, lng: Double){
-        val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$lat,$lng&radius=15000&type=hospital&key=AIzaSyA-e-43mD-6MdO21GkJN0WTHGig1J6dMuM"
+    private fun fPlaceMarkerOnMap(location: LatLng) {
+
+        val markerOptions = MarkerOptions().position(location)
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(
+            BitmapFactory.decodeResource(resources, R.mipmap.ic_femaleuser_location)))
+        mMap.addMarker(markerOptions)
+
+    }
+
+    fun fetchJson(lat:Double, lng: Double, lcation:String ){
+        val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$lat,$lng&radius=15000&type=$lcation&key=AIzaSyA-e-43mD-6MdO21GkJN0WTHGig1J6dMuM"
 
         val request = Request.Builder().url(url).build()
-        val client = OkHttpClient();
+        val client = OkHttpClient()
         client.newCall(request).enqueue(object: Callback{
             override fun onResponse(call: Call, response: Response) {
                 val body = response.body?.string()
@@ -160,6 +220,38 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
                    println(places)
                     handler.post(Runnable {
                         placeMarkerOnMap(currentLatLng)
+                    })
+                }
+            }
+            override fun onFailure(call: Call, e: IOException) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+        })
+    }
+    @Override
+    fun fetchJson(){
+        val url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=delegacia%20da%20mulher&key=AIzaSyA-e-43mD-6MdO21GkJN0WTHGig1J6dMuM"
+
+        val request = Request.Builder().url(url).build()
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(object: Callback{
+            override fun onResponse(call: Call, response: Response) {
+                val body = response.body?.string()
+
+                val gson = GsonBuilder().create()
+                val resultado =  gson.fromJson(body, resultados::class.java)
+
+                val currentLatLng = LatLng(resultado.results[1].geometry.location.lat,resultado.results[1].geometry.location.lng )
+                println(resultado)
+                println(body)
+
+                var handler = Handler(Looper.getMainLooper())
+                for(places in resultado.results){
+                    val currentLatLng = LatLng(places.geometry.location.lat,places.geometry.location.lng )
+                    println(places)
+                    handler.post(Runnable {
+                        fPlaceMarkerOnMap(currentLatLng)
+
                     })
                 }
             }
