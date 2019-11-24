@@ -20,7 +20,8 @@ interface RequisicoesPostagem {
     // exemplo de POST
     @RequestLine("POST /meio?nome={nome}&Senha={Senha}&CPF={CPF}&DataNascimento={DataNascimento}&estadoCivil={estado_civil}")
     fun criarPostagem(@Param("nome") nome:String,
-                      @Param("Senha") senha:String,@Param("CPF") CPF:String,
+                      @Param("Senha") senha:String,
+                      @Param("CPF") CPF:String,
                       @Param("DataNascimento") DataNascimento:String,
                       @Param("estado_civil") estado_civil:String)
 
