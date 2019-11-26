@@ -21,23 +21,42 @@ import okhttp3.*
 import java.io.IOException
 import com.google.gson.GsonBuilder
 import android.R.string
+import android.graphics.Color
+import android.os.AsyncTask
 import android.os.AsyncTask.execute
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.fragment.app.FragmentActivity
+import com.example.streetsecuritynow.HTTP.CADASTRO
+import com.example.streetsecuritynow.HTTP.RequisicoesPostagem
+import com.example.streetsecuritynow.ui.login.JsonParseMateus
+import com.example.streetsecuritynow.ui.login.JsonParseRoutes
+import feign.Feign
+import feign.gson.GsonEncoder
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.lang.reflect.Array
+import java.net.HttpURLConnection
+import java.net.URL
 import java.security.Key
+import java.util.ArrayList
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerClickListener  {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerClickListener {
     override fun onMarkerClick(p0: Marker?) = false
 
+    var currentLatLng:LatLng = LatLng(0.0,0.0)
     private lateinit var mMap: GoogleMap
     private val placesClient: PlacesClient? = null
+    val markerPoints:ArrayList<LatLng>? = ArrayList()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var lastLocation: Location
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_maps)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
@@ -61,23 +80,215 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
      */
     override fun onMapReady(googleMap: GoogleMap) {
 
-
         mMap = googleMap
 
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.setOnMarkerClickListener(this)
+
 
         googleMap.setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
                     this,R.raw.mapstyle));
 
         setUpMap()
+        mMap.setOnMapClickListener(GoogleMap.OnMapClickListener {
+
+              if (markerPoints != null && markerPoints!!.size > 1) {
+                  markerPoints.clear();
+                  mMap.clear();
+              }
+              println("ALTURAAAAAAAAAAAAA<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<"+it)
+              println("ALTURAAAAAAAAAAAAA<<<<<<<<<<<<<<<<<<<<"+markerPoints)
+              markerPoints!!.add(it);
+              val options = MarkerOptions();
+              options.position(it);
+
+              if (markerPoints.size == 1) {
+                  options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+              } else if (markerPoints.size == 2) {
+                  options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+              }
+
+              // Add new marker to the Google Map Android API V2
+              mMap.addMarker(options);
+              // Checks, whether start and end locations are captured
+
+              if (markerPoints.size >= 2) {
+                  val origin :LatLng = markerPoints.get(0)!!;
+                  val dest : LatLng  = markerPoints.get(1)!!;
+                  // Getting URL to the Google Directions API
+                  val url : String = getDirectionsUrl(origin!!, dest!!);
+                  val downloadTask = DownloadTask();
+                  // Start downloading json data from Google Directions API
+                  downloadTask.execute(url);
+              }
+
+        })
+
     }
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
+    private inner class DownloadTask : AsyncTask<String,Void,String>() {
+
+        @Override
+        override fun doInBackground(vararg params: String ): String? {
+
+            var data = "";
+
+            try {
+                data = downloadUrl(params[0]);
+            } catch (e:Exception) {
+                println("Background Task >>>>>>"+ e );
+            }
+            return data;
+        }
+
+         override fun onPostExecute (result:String ) {
+            super.onPostExecute(result);
+             var parserTask : ParserTask = ParserTask();
+            parserTask.execute(result);
+        }
+
+    }
+
+     inner class ParserTask : AsyncTask<String, Int, List<List<HashMap<String,String>>>>() {
+
+        // Parsing the data in non-ui thread
+        @Override
+        override fun doInBackground(vararg params: String):List<List<HashMap<String,String>>>{
+
+            var jObject:JSONObject;
+            var routes : List<List<HashMap<String,String>>>? = null;
+            try {
+                jObject = JSONObject(params[0]);
+                println(" ENTROU NO JSON FAZER ALGO NO JSONNNNNNNNNNNNN  >>>>>> " + jObject)
+                println(" PARAMETROS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>> " + params[0] + "AGORA TODOS >>>>>>>>>> "+params)
+                routes = JsonParseRoutes().parse(jObject);
+
+                println(" ENTROU NO ROUTES >>>>>> " + routes)
+            } catch (e:Exception) {
+                println("ENTROU NO CATCHHHHHHHHHHHH >>>>>> " + e)
+                e.printStackTrace();
+            }
+            println(" Retornando ROUTES >>>>>> " + routes)
+            return routes!!
+            //return routes!!;
+        }
+
+
+         override fun onPostExecute(result: List<List<HashMap<String, String>>>?) {
+            println("EM BACKGROUND AAEFAEFAEF" + result)
+            var points : ArrayList<LatLng>? = null;
+            var lineOptions:PolylineOptions?  = null;
+            println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ENTRO" )
+             println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ENTRO" + result!!.size)
+
+             var i:Int = 0
+            while( i < result!!.size) {
+                if (result.get(i) == null)
+                    break
+                if(result.size %2 == i)
+                    println(i)
+
+                points = ArrayList();
+                lineOptions = PolylineOptions();
+
+                var path :List<HashMap<String,String>> = result.get(i);
+                var j : Int = 0;
+                println("ESSE E O PATH SIZE "+ path.size)
+                while ( j < path.size) {
+                    val point: HashMap<String,String> = path.get(j);
+                    if((point.get("lat")?.toDouble()) == null || (point.get("lng")?.toDouble()) == null){}
+                        else {
+
+                        var lat: Double? = (point.get("lat")!!.toDouble());
+                        var lng: Double? = (point.get("lng")!!.toDouble());
+                        if (lat == null || lng == null) {
+                            println("ESTAMOS NESSA POSICAO >>>>>>>>>>>> " + i)
+                            break
+                        }
+                        var position: LatLng = LatLng(lat!!, lng!!);
+                        println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< POINTS" + position)
+                        points.add(position);
+                        }
+                        j++
+
+                }
+                println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< POINTS" + points )
+                lineOptions.addAll(points!!);
+                lineOptions.width(12.0F);
+                lineOptions.color(Color.RED);
+                lineOptions.geodesic(true);
+                i++
+            }
+                println(lineOptions)
+// Drawing polyline in the Google Map for the i-th route
+            mMap.addPolyline(lineOptions);
+        }
+    }
+    private fun downloadUrl(strUrl:String):String {
+        var data:String = "";
+        var iStream: InputStream? = null;
+        var urlConnection: HttpURLConnection?  = null;
+        try {
+            val url:URL = URL(strUrl);
+
+            url.openConnection();
+
+            urlConnection = url.openConnection() as HttpURLConnection
+
+            iStream = urlConnection.getInputStream();
+
+            var br: BufferedReader  = BufferedReader(InputStreamReader(iStream));
+
+            var sb:StringBuffer = StringBuffer();
+
+            var line : String? = "";
+            do{
+                sb.append(line);
+                line = br.readLine()
+            }
+            while (line != null)
+            data = sb.toString();
+
+            br.close();
+
+        } catch (e:Exception) {
+            println("Exception >>>>>>>>>>>>>>>>>" + e );
+        } finally {
+            iStream!!.close();
+            urlConnection!!.disconnect();
+        }
+        println(data)
+        return data;
+    }
+     private fun getDirectionsUrl(origin:LatLng , dest:LatLng ):String {
+
+        // Origin of route
+        val str_origin : String  = "origin=" + origin.latitude + "," + origin.longitude;
+
+        // Destination of route
+        val str_dest : String = "destination=" + dest.latitude + "," + dest.longitude;
+
+        // Sensor enabled
+        val sensor : String= "sensor=false";
+        val mode:String  = "mode=walking";
+
+        // Building the parameters to the web service
+        val parameters:String = str_origin + "&" + str_dest + "&" + sensor + "&" + mode;
+
+        // Output format
+        val output :String= "json";
+
+        // Building the url to the web service
+        val url :String= "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=AIzaSyA-e-43mD-6MdO21GkJN0WTHGig1J6dMuM" ;
+        println(url + " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> URL")
+
+        return url;
+    }
     private fun setUpMap() {
 
              if (ActivityCompat.checkSelfPermission(this,
@@ -97,7 +308,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
             if (location != null) {
                 lastLocation = location
 
-                    val currentLatLng = LatLng(location.latitude, location.longitude)
+                    currentLatLng = LatLng(location.latitude, location.longitude)
                     placeMarkerOnMap(currentLatLng)
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
 
@@ -199,7 +410,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
     }
 
     fun fetchJson(lat:Double, lng: Double, lcation:String ){
-        val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$lat,$lng&radius=15000&type=$lcation&key=AIzaSyA-e-43mD-6MdO21GkJN0WTHGig1J6dMuM"
+        val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$lat,$lng&radius=15000&type=$lcation&key=${R.string.google_maps_key}"
 
         val request = Request.Builder().url(url).build()
         val client = OkHttpClient()
@@ -230,7 +441,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
     }
     @Override
     fun fetchJson(){
-        val url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=delegacia%20da%20mulher&key=AIzaSyA-e-43mD-6MdO21GkJN0WTHGig1J6dMuM"
+        val url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=delegacia%20da%20mulher&key=${R.string.google_maps_key}"
 
         val request = Request.Builder().url(url).build()
         val client = OkHttpClient()
