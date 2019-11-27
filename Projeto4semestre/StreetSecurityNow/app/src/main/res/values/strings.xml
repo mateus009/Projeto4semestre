@@ -2,6 +2,7 @@
     <string name="app_name">Street Security Now</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_login">Sign in</string>
+    <string name="cadastro">Cadastre-se</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in or register</string>
@@ -10,4 +11,79 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <string name="app_name_tela_login">IdoLogin</string>
+    <string name="usuario">Usuario</string>
+    <string name="senha">Senha</string>
+    <string name="login">Login</string>
+    <string name="Esqueceu_a_senha">Esqueceu a senha?</string>
+
+    <!-- strings tela de cadastro-->
+
+    <string name="dados_pessoais">DADOS PESSOAIS</string>
+    <string name="Cadastro_usuario">CADASTRO USUARIO</string>
+    <string name="cadastro_nome_completo">Nome Completo</string>
+    <string name="cadastro_cpf">CPF</string>
+    <string name="Senha">Senha</string>
+    <string name="cadastro_data_nascimento">Data Nascimento</string>
+    <string name="cadastro_estado_Civil">Estado Civil</string>
+    <string name="cadastro_sexo">sexo</string>
+    <string-array name="sexos">
+        <item>Selecionar Sexo</item>
+        <item>Masculino</item>
+        <item>Feminino</item>
+        <item>Prefiro não responder</item>
+    </string-array>
+
+    <!-- tela cadastro  parte de dados de acesso as contato-->
+
+    <string name="dados_acesso_contatoC">DADOS DE ACESSO E CONTATO</string>
+    <string name="cadastro_email">Email</string>
+    <string name="cadastro_telefone">Telefone</string>
+    <string name="cadastro_senha">Senha</string>
+    <string name="cadastro_confirma_senha">Confirmar Senha</string>
+
+    <!--tela cadastro parte de endereço-->
+
+    <string name="dados_endereco">DADOS ENDEREÇO</string>
+    <string name="Endereco">ENDEREÇO</string>
+    <string name="cadastro_rua">Rua</string>
+    <string name="cadastro_numero_moradia">Número Moradia</string>
+    <string name="cadastro_referencia_moradia">Referencia</string>
+    <string name="cadastro_complemento_moradia">Complemento</string>
+    <string name="cadastro_CEP">CEP</string>
+    <string name="cadastro_bairro">Bairro</string>
+    <string name="cadastro_cidade">Cidade</string>
+    <string name="cadastro_estado">Estado</string>
+    <string name="cadastro_pais">País</string>
+
+
+    <!--tela cadastro usuario serviço-->
+
+    <string name="cdstServ_nome">Nome Serviço</string>
+    <string name="cdstServ_preco">Preço</string>
+    <string name="cdstServ_localAtendimento">Local Atendimento</string>
+    <string name="cdstServ_atendimentoDomiciliar"> Atendimento á Domicilio </string>
+    <string name="cdstServ_MeuProprioEndereco"> Meu Proprio Endereço</string>
+    <string name="cdstServ_estimativaTempo">Estimativa de Tempo</string>
+    <string name="cdstServ_selecionarCategoria">Selecionar Categoria</string>
+    <string name="cdstServ_cadastrar">Cadastrar</string>
+
+    <!--Strings Botões-->
+    <string name="bt_cadastrar">Cadastrar</string>
+    <string name="bt_logar">Logar</string>
+    <string name="bt_cancelar">Cancelar</string>
+    <string name="bt_proximo">Proximo</string>
+
+    <!--Categorias-->
+
+    <string name="grid_categoria">CATEGORIAS</string>
+    <string name="grid_auto">Auto</string>
+    <string name="grid_construção">Construção</string>
+    <string name="grid_entregasEncomendas">Entregas   e encomendas</string>
+    <string name="grid_Domesticos">Domésticos</string>
+    <string name="grid_exteticaModa">Extetica e Moda</string>
+    <string name="grid_informaticaTecnologia">Informatica e Tecnologia</string>
+    <string name="grid_educacao">Educação</string>
+    <string name="grid_eventosMusicasDecoracoes">Eventos Musicas e Decorações</string>
+    <string name="selected_item" />
 </resources>

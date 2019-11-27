@@ -1,116 +1,142 @@
 package com.example.streetsecuritynow.ui.login
 
-import android.app.Activity
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.os.AsyncTask
 import android.os.Bundle
-import androidx.annotation.StringRes
+import android.os.StrictMode
 import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.widget.Button
 import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.Toast
+import com.example.streetsecuritynow.HTTP.RequisicoesPostagem
+import com.example.streetsecuritynow.MapsActivity
 
 import com.example.streetsecuritynow.R
+import com.example.streetsecuritynow.data.model.User
+import com.example.streetsecuritynow.data.model.Usuario
+import feign.Feign
+import feign.gson.GsonDecoder
+import kotlinx.android.synthetic.main.activity_login.*
+import org.json.JSONObject
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var loginViewModel: LoginViewModel
+    var preferencias : SharedPreferences? = null
+    var editPreferencias : SharedPreferences.Editor? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+
+        StrictMode.setThreadPolicy(policy)
+
 
         setContentView(R.layout.activity_login)
 
-        val username = findViewById<EditText>(R.id.username)
-        val password = findViewById<EditText>(R.id.password)
-        val login = findViewById<Button>(R.id.login)
-        val loading = findViewById<ProgressBar>(R.id.loading)
+        preferencias = getSharedPreferences(
+            "AndroidManifest.xml", Context.MODE_PRIVATE)
 
-        loginViewModel = ViewModelProviders.of(this, LoginViewModelFactory())
-            .get(LoginViewModel::class.java)
+        editPreferencias = preferencias?.edit()
 
-        loginViewModel.loginFormState.observe(this@LoginActivity, Observer {
-            val loginState = it ?: return@Observer
 
-            // disable login button unless both username / password is valid
-            login.isEnabled = loginState.isDataValid
+    }
+        fun OnLogar(v:View){
+            println("clicou")
+            val username = findViewById<EditText>(R.id.username)
+            val password = findViewById<EditText>(R.id.password)
+            var nome = username.getText().toString()
+            var senha = password.getText().toString()
+            val logado = User(nome,senha)
+            val task = LerPostagemTask()
+            val Logou: Boolean? = task.execute(logado).get()
+            println(Logou)
+            println("-----------------------------------------------------------------")
 
-            if (loginState.usernameError != null) {
-                username.error = getString(loginState.usernameError)
+            if(username.length()>10 && username!= null && password != null && password.length()>10)
+            {
+               if(checkbox.isChecked){
+                   editPreferencias?.putBoolean("autenticado", true)
+                   editPreferencias?.commit()
+
+               }
+            } else{
+                Toast.makeText(this, "E-mail ou senha estão errados.", Toast.LENGTH_SHORT).show()
+
             }
-            if (loginState.passwordError != null) {
-                password.error = getString(loginState.passwordError)
+
+
+           if(Logou!!) {
+               var mapa = Intent(this, MapsActivity::class.java)
+               startActivity(mapa)
+           }
+            else{
+               Toast.makeText(this, "Erro na Autenticação", Toast.LENGTH_SHORT).show()
             }
-        })
 
-        loginViewModel.loginResult.observe(this@LoginActivity, Observer {
-            val loginResult = it ?: return@Observer
 
-            loading.visibility = View.GONE
-            if (loginResult.error != null) {
-                showLoginFailed(loginResult.error)
-            }
-            if (loginResult.success != null) {
-                updateUiWithUser(loginResult.success)
-            }
-            setResult(Activity.RESULT_OK)
 
-            //Complete and destroy login activity once successful
-            finish()
-        })
-
-        username.afterTextChanged {
-            loginViewModel.loginDataChanged(
-                username.text.toString(),
-                password.text.toString()
-            )
         }
-
-        password.apply {
-            afterTextChanged {
-                loginViewModel.loginDataChanged(
-                    username.text.toString(),
-                    password.text.toString()
+    inner  class LerPostagemTask : AsyncTask<User, Void, Boolean>() {
+        override fun doInBackground(vararg params: User): Boolean? {
+            val request = Feign.builder()
+                .decoder(GsonDecoder())
+                .target(
+                    RequisicoesPostagem::class.java,
+                    "http://192.168.0.17/renegates/api/"
                 )
-            }
 
-            setOnEditorActionListener { _, actionId, _ ->
-                when (actionId) {
-                    EditorInfo.IME_ACTION_DONE ->
-                        loginViewModel.login(
-                            username.text.toString(),
-                            password.text.toString()
-                        )
-                }
-                false
-            }
-
-            login.setOnClickListener {
-                loading.visibility = View.VISIBLE
-                loginViewModel.login(username.text.toString(), password.text.toString())
+            try {
+                return request.getPostagem(params[0].Nome!!,params[0].Senha!!)
+            } catch (e:Exception) {
+                println(e)
+                return null
             }
         }
     }
+    private fun handleJson(jsonString: String?) : Usuario{
 
-    private fun updateUiWithUser(model: LoggedInUserView) {
-        val welcome = getString(R.string.welcome)
-        val displayName = model.displayName
-        // TODO : initiate successful logged in experience
-        Toast.makeText(
-            applicationContext,
-            "$welcome $displayName",
-            Toast.LENGTH_LONG
-        ).show()
+
+
+        var jsonObject = JSONObject(jsonString)
+
+
+
+
+
+
+        var usuario = Usuario(
+
+            jsonObject.getString("nome"),
+
+            jsonObject.getString("CPF"),
+
+            jsonObject.getString("DataNascimento"),
+
+            jsonObject.getString("sexo"),
+
+            jsonObject.getString("estado_civil"),
+
+            jsonObject.getString("CEP"),
+
+            jsonObject.getString("Senha"),
+
+            jsonObject.getInt("ID")
+
+        )
+
+
+
+        UsuarioLogado(usuario.ID,usuario.nome)
+        println(usuario)
+        return usuario
+
     }
 
-    private fun showLoginFailed(@StringRes errorString: Int) {
-        Toast.makeText(applicationContext, errorString, Toast.LENGTH_SHORT).show()
-    }
 }
 
 /**
