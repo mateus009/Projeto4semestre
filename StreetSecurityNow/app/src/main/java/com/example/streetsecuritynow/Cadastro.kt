@@ -48,7 +48,7 @@ class Cadastro : AppCompatActivity(){
                 .encoder(GsonEncoder())
                 .target(
                     RequisicoesPostagem::class.java,
-                    "http://192.168.0.17/renegates/"
+                    getString(R.string.URL)
                 )
 
             try {

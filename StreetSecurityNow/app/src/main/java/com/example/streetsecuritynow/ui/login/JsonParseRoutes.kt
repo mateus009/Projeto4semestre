@@ -65,10 +65,13 @@ class JsonParseRoutes {
                         /** Traversing all steps  */
                         for (k in 0 until jSteps!!.length()) {
                             var polyline = ""
+                            var teste = ""
                             polyline = ((jSteps
                                 .get(k) as JSONObject).get("polyline") as JSONObject).get("points") as String
                             val list = decodePoly(polyline)
-
+                            teste = (jSteps.get(k) as JSONObject).get("html_instructions") as String
+                            val hashm = HashMap<String, String>()
+                            hashm["html_instructions"] = teste
                             /** Traversing all points  */
                             for (l in list.indices) {
                                 val hm = HashMap<String, String>()
@@ -76,6 +79,8 @@ class JsonParseRoutes {
                                 hm["lng"] = java.lang.Double.toString(list[l].longitude)
                                 path.add(hm)
                             }
+                            path.add(hashm)
+
                         }
                     }
                     routes.add(path)

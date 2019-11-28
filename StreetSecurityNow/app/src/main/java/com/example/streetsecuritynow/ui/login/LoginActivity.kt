@@ -9,6 +9,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import com.example.streetsecuritynow.HTTP.RequisicoesPostagem
 import com.example.streetsecuritynow.MapsActivity
 
@@ -21,7 +22,6 @@ import org.json.JSONObject
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var loginViewModel: LoginViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,33 +42,40 @@ class LoginActivity : AppCompatActivity() {
             var nome = username.getText().toString()
             var senha = password.getText().toString()
             val logado = User(nome,senha)
-            val task = LerPostagemTask()
-            val Logou: Boolean? = task.execute(logado).get()
-            println(Logou)
-            println("-----------------------------------------------------------------")
+            var Logou: Boolean = false
+            try {
+                val task = LerPostagemTask()
+                Logou = task.execute(logado).get()
+            }catch (e:Exception) {
+                println(e)
+                Toast.makeText(this,
+                    "Ocorreu um erro",Toast.LENGTH_SHORT).show()
+            }
 
-
-
-
-           if(Logou!!){
+           if(Logou){
                var mapa = Intent(this, MapsActivity::class.java)
                 startActivity(mapa)
-           // }
-           // else{
-           //     println("LOGOU NAOOOOOOOOOOOOOOOO")
-            }
+
+            }else
+           {
+               println("porraaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+               Toast.makeText(this,
+                   "Login ou senha incorretos",Toast.LENGTH_LONG).show()
+           }
 
 
 
         }
     inner  class LerPostagemTask : AsyncTask<User, Void, Boolean>() {
         override fun doInBackground(vararg params: User): Boolean? {
+
             val request = Feign.builder()
                 .decoder(GsonDecoder())
                 .target(
                     RequisicoesPostagem::class.java,
-                    "http://192.168.0.17/renegates/api/"
+                    getString(R.string.URL)
                 )
+            println(" >>>>>>>>>>>>>>>>>>> request  "+request )
 
             try {
                 return request.getPostagem(params[0].Nome!!,params[0].Senha!!)
@@ -78,44 +85,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
     }
-    private fun handleJson(jsonString: String?) : Usuario{
 
-
-
-        var jsonObject = JSONObject(jsonString)
-
-
-
-
-
-
-        var usuario = Usuario(
-
-            jsonObject.getString("nome"),
-
-            jsonObject.getString("CPF"),
-
-            jsonObject.getString("DataNascimento"),
-
-            jsonObject.getString("sexo"),
-
-            jsonObject.getString("estado_civil"),
-
-            jsonObject.getString("CEP"),
-
-            jsonObject.getString("Senha"),
-
-            jsonObject.getInt("ID")
-
-        )
-
-
-
-        UsuarioLogado(usuario.ID,usuario.nome)
-        println(usuario)
-        return usuario
-
-    }
 
 }
 

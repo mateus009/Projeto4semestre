@@ -7,7 +7,7 @@ import feign.Param
 import feign.RequestLine
 
 interface RequisicoesPostagem {
-    @RequestLine("GET /Usuarios?nome={nome}&senha={senha}")
+    @RequestLine("GET api/Usuarios?nome={nome}&senha={senha}")
     fun getPostagem(@Param("nome") nome:String, @Param("senha") senha:String): Boolean
 
     // exemplo de GET que traz uma lista
@@ -15,7 +15,7 @@ interface RequisicoesPostagem {
     fun getPostagens(@Param("id") id:Int): Usuario
 
 
-    @RequestLine("GET /Usuarios")
+    @RequestLine("GET api//Usuarios")
     fun getExists(user:User) : Boolean
     // exemplo de POST
     @RequestLine("POST /meio?nome={nome}&Senha={Senha}&CPF={CPF}&DataNascimento={DataNascimento}&estadoCivil={estado_civil}")

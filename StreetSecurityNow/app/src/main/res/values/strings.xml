@@ -13,6 +13,7 @@
     <string name="login_failed">"Login failed"</string>
     <string name="app_name_tela_login">IdoLogin</string>
     <string name="usuario">Usuario</string>
+    <string name="URL">http://192.168.0.17/renegates/</string>
     <string name="senha">Senha</string>
     <string name="login">Login</string>
     <string name="Esqueceu_a_senha">Esqueceu a senha?</string>

@@ -27,10 +27,10 @@ import android.os.AsyncTask.execute
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import com.example.streetsecuritynow.HTTP.CADASTRO
 import com.example.streetsecuritynow.HTTP.RequisicoesPostagem
-import com.example.streetsecuritynow.ui.login.JsonParseMateus
 import com.example.streetsecuritynow.ui.login.JsonParseRoutes
 import feign.Feign
 import feign.gson.GsonEncoder
@@ -47,6 +47,8 @@ import java.util.ArrayList
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerClickListener {
     override fun onMarkerClick(p0: Marker?) = false
+
+    var API = "a"
 
     var currentLatLng:LatLng = LatLng(0.0,0.0)
     private lateinit var mMap: GoogleMap
@@ -66,7 +68,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
         // Initialize Places.
         Places.initialize(applicationContext, R.string.google_maps_key.toString())
 // Create a new Places client instance.
-
+        API = getString(R.string.google_maps_key)
     }
 
     /**
@@ -91,8 +93,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
                     this,R.raw.mapstyle));
 
         setUpMap()
-        mMap.setOnMapClickListener(GoogleMap.OnMapClickListener {
-
+        mMap.setOnMapLongClickListener(GoogleMap.OnMapLongClickListener{
               if (markerPoints != null && markerPoints!!.size > 1) {
                   markerPoints.clear();
                   mMap.clear();
@@ -183,6 +184,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
             println("EM BACKGROUND AAEFAEFAEF" + result)
             var points : ArrayList<LatLng>? = null;
             var lineOptions:PolylineOptions?  = null;
+             var Alerta:String? = null;
             println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ENTRO" )
              println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ENTRO" + result!!.size)
 
@@ -203,11 +205,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
                     val point: HashMap<String,String> = path.get(j);
                     if((point.get("lat")?.toDouble()) == null || (point.get("lng")?.toDouble()) == null){}
                         else {
-
+                        if((point.get("html_instructions")) != null ) {
+                            val ameaca: String? = point.get("html_instructions").toString()
+                            println(">>>>>>>>>>>>>>>>>>>>>>>>>> ameaca : " + ameaca)
+                            if (ameaca!!.contains("Av. Santos Dumont"))
+                            {
+                                println("Rua perigosa")
+                            }
+                        }
                         var lat: Double? = (point.get("lat")!!.toDouble());
                         var lng: Double? = (point.get("lng")!!.toDouble());
                         if (lat == null || lng == null) {
-                            println("ESTAMOS NESSA POSICAO >>>>>>>>>>>> " + i)
+
                             break
                         }
                         var position: LatLng = LatLng(lat!!, lng!!);
@@ -284,7 +293,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
         val output :String= "json";
 
         // Building the url to the web service
-        val url :String= "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=AIzaSyA-e-43mD-6MdO21GkJN0WTHGig1J6dMuM" ;
+        val url :String= "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters + "&key=${API}" ;
         println(url + " >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> URL")
 
         return url;
@@ -410,7 +419,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
     }
 
     fun fetchJson(lat:Double, lng: Double, lcation:String ){
-        val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$lat,$lng&radius=15000&type=$lcation&key=${R.string.google_maps_key}"
+        val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=$lat,$lng&radius=15000&type=$lcation&key=$API"
 
         val request = Request.Builder().url(url).build()
         val client = OkHttpClient()
@@ -441,7 +450,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
     }
     @Override
     fun fetchJson(){
-        val url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=delegacia%20da%20mulher&key=${R.string.google_maps_key}"
+        val url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query=delegacia%20da%20mulher&key=$API"
 
         val request = Request.Builder().url(url).build()
         val client = OkHttpClient()
@@ -451,7 +460,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
 
                 val gson = GsonBuilder().create()
                 val resultado =  gson.fromJson(body, resultados::class.java)
-
+                println(resultado)
                 val currentLatLng = LatLng(resultado.results[1].geometry.location.lat,resultado.results[1].geometry.location.lng )
                 println(resultado)
                 println(body)

@@ -26,7 +26,7 @@
             android:name=".ui.login.LoginActivity"
             android:label="@string/title_activity_login">
             <intent-filter>
-
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
@@ -35,7 +35,9 @@
             android:name=".Cadastro"
             android:label="@string/cadastro">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
         </activity>
@@ -56,7 +58,6 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
