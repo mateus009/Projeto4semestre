@@ -18,12 +18,13 @@ interface RequisicoesPostagem {
     @RequestLine("GET api//Usuarios")
     fun getExists(user:User) : Boolean
     // exemplo de POST
-    @RequestLine("POST /meio?nome={nome}&Senha={Senha}&CPF={CPF}&DataNascimento={DataNascimento}&estadoCivil={estado_civil}")
+    @RequestLine("POST /meio?nome={nome}&Senha={Senha}&CPF={CPF}&DataNascimento={DataNascimento}&estadoCivil={estado_civil}&sexo={sexo}")
     fun criarPostagem(@Param("nome") nome:String,
                       @Param("Senha") senha:String,
                       @Param("CPF") CPF:String,
                       @Param("DataNascimento") DataNascimento:String,
-                      @Param("estado_civil") estado_civil:String)
+                      @Param("estado_civil") estado_civil:String,
+                      @Param("sexo") sexo:String)
 
     // exemplo de DELETE
     @RequestLine("DELETE /posts/{id}")
