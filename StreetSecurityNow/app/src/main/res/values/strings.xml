@@ -1,5 +1,5 @@
 <resources>
-    <string name="URL">http://192.168.0.17/renegates/</string>
+    <string name="URL">http://renegatesapi-env.d2amhgjvzt.us-east-1.elasticbeanstalk.com/</string>
     <string name="app_name">Street Security Now</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_login">Sign in</string>

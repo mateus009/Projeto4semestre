@@ -182,7 +182,65 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback,GoogleMap.OnMarkerC
 
 
          override fun onPostExecute(result: List<List<HashMap<String, String>>>?) {
-9        }
+            println("EM BACKGROUND AAEFAEFAEF" + result)
+            var points : ArrayList<LatLng>? = null;
+            var lineOptions:PolylineOptions?  = null;
+             var Alerta:String? = null;
+            println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ENTRO" )
+             println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ENTRO" + result!!.size)
+
+             var i:Int = 0
+            while( i < result!!.size) {
+                if (result.get(i) == null)
+                    break
+
+
+                points = ArrayList();
+                lineOptions = PolylineOptions();
+
+                var path :List<HashMap<String,String>> = result.get(i);
+                var j : Int = 0;
+                println("ESSE E O PATH SIZE "+ path.size)
+                while ( j < path.size) {
+                    val point: HashMap<String,String> = path.get(j);
+                    println(" POINT >>>>>>>>>>>>>>>>>>" + point)
+                    if((point.get("html_instructions")) != null ) {
+                        val ameaca: String? = point.get("html_instructions").toString()
+                        println(">>>>>>>>>>>>>>>>>>>>>>>>>> ameaca : " + ameaca)
+                        if (ameaca!!.toLowerCase().indexOf("av. santos dumont") != -1 )
+                        {
+                            println("Rua perigosa")
+                            Aviso.text = "A rua Av Santos Dumont é perigosa"
+
+                        }
+                    }
+                    if((point.get("lat")?.toDouble()) == null || (point.get("lng")?.toDouble()) == null){}
+                        else {
+
+                        var lat: Double? = (point.get("lat")!!.toDouble());
+                        var lng: Double? = (point.get("lng")!!.toDouble());
+                        if (lat == null || lng == null) {
+
+                            break
+                        }
+                        var position: LatLng = LatLng(lat!!, lng!!);
+                        println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< POINTS" + position)
+                        points.add(position);
+                        }
+                        j++
+
+                }
+                println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< POINTS" + points )
+                lineOptions.addAll(points!!);
+                lineOptions.width(12.0F);
+                lineOptions.color(Color.RED);
+                lineOptions.geodesic(true);
+                i++
+            }
+                println(lineOptions)
+// Drawing polyline in the Google Map for the i-th route
+            mMap.addPolyline(lineOptions);
+        }
     }
     private fun downloadUrl(strUrl:String):String {
         var data:String = "";
